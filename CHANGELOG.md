@@ -12,6 +12,17 @@ We follow **Semantic Versioning (SemVer)** to indicate the nature of changes:
 
 Each section lists the changes in **chronological order**, with the **most recent release at the top**. Where applicable, links to relevant discussions or issues are provided.
 
+### 🌟 [2.4.0] - BaseScreen Primary Scroll Controller
+
+- 🆕 **New Features**:
+  - Added `primaryScrollController` getter to `BaseScreen` — lazily creates and owns a `ScrollController`, wrapped as `PrimaryScrollController` above the `Scaffold` so iOS status-bar tap scrolls to top automatically on every screen
+  - Added `attachPrimaryScrollController` flag (defaults `true`) — set to `false` on embedded `BaseScreen` widgets so their scroll views attach to the outer screen's controller instead of shadowing it
+
+- 📦 **Dependency Updates**:
+  - Migrated `InternetConnectionHandler` to `InternetConnection.createInstance(triggerStream: Connectivity().onConnectivityChanged)` to preserve hardware-change detection
+
+---
+
 ### 🎯 [2.3.2] - Connection & Error Navigation Hardening
 
 - 🐛 **Bug Fixes**:

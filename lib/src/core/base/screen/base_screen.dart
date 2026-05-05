@@ -141,6 +141,35 @@ abstract class BaseScreen<M extends BaseBloc, T extends StatefulWidget, F>
         appBar: _buildAppBar(),
       );
 
+  /// The [ScrollController] exposed as this screen's [PrimaryScrollController]
+  /// when [attachPrimaryScrollController] is `true`.
+  ///
+  /// [BaseScreen] wraps the produced [Scaffold] in a [PrimaryScrollController]
+  /// using this controller — placed *above* the [Scaffold] so Flutter's
+  /// built-in [Scaffold.handleStatusBarTap] handler can find it. Descendant
+  /// vertical scroll views without an explicit `controller` auto-attach to
+  /// it, and on iOS tapping the status bar scrolls it to the top.
+  ///
+  /// Defaults to a lazily-created controller owned and disposed by
+  /// [BaseScreen] — subclasses can use it directly (e.g. for pagination
+  /// listeners or programmatic `animateTo(0)`) without declaring their own.
+  /// Override to provide your own controller; in that case you own its
+  /// disposal and [BaseScreen] never touches it.
+  ScrollController get primaryScrollController =>
+      _defaultPrimaryScrollController ??= ScrollController();
+
+  ScrollController? _defaultPrimaryScrollController;
+
+  /// Whether [BaseScreen] should wrap the produced [Scaffold] in a
+  /// [PrimaryScrollController] using [primaryScrollController].
+  ///
+  /// Defaults to `true`. Set to `false` for embedded "screen" widgets that
+  /// live inside another [BaseScreen] (nested layouts) — in those cases the
+  /// outer screen's [PrimaryScrollController] should receive the scroll
+  /// attachment, otherwise the inner one shadows the outer's and Flutter's
+  /// status-bar tap handler can't reach the actual scrollable.
+  bool get attachPrimaryScrollController => true;
+
   /// The BLoC instance exposed to subclasses for convenience.
   M get bloc {
     try {
@@ -223,6 +252,10 @@ abstract class BaseScreen<M extends BaseBloc, T extends StatefulWidget, F>
     _loadingTimer = null;
     RouteHelper.routeObserver.unsubscribe(this);
     disposeData();
+    // Only disposes the controller if BaseScreen created it (i.e. the getter
+    // wasn't overridden). User-owned controllers are never touched here.
+    _defaultPrimaryScrollController?.dispose();
+    _defaultPrimaryScrollController = null;
     super.dispose();
   }
 
@@ -301,7 +334,7 @@ abstract class BaseScreen<M extends BaseBloc, T extends StatefulWidget, F>
           route = RouteHelper(context);
           screenWidth = constraints.maxWidth;
           screenHeight = constraints.maxHeight;
-          return ignoreScaffold
+          final Widget screen = ignoreScaffold
               ? _handleNullBuilder()
               : BodyScaffoldConfig(
                   scaffoldConfig: scaffoldConfig.copyWith(
@@ -309,6 +342,12 @@ abstract class BaseScreen<M extends BaseBloc, T extends StatefulWidget, F>
                   ),
                   body: _handleNullBuilder(),
                 ).toScaffold();
+          return attachPrimaryScrollController
+              ? PrimaryScrollController(
+                  controller: primaryScrollController,
+                  child: screen,
+                )
+              : screen;
         },
       ),
     );

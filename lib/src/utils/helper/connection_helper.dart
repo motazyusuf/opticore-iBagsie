@@ -72,7 +72,9 @@ class InternetConnectionHandler {
   /// Single [InternetConnection] instance used for both the status stream and
   /// on-demand ping checks. Using one instance avoids duplicate sockets and
   /// keeps the stream / check results consistent.
-  static final InternetConnection _checker = InternetConnection();
+  static final InternetConnection _checker = InternetConnection.createInstance(
+    triggerStream: Connectivity().onConnectivityChanged,
+  );
 
   // ---------------------------------------------------------------------------
   // Stream & real-time status
