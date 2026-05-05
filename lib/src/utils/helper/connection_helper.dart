@@ -115,8 +115,7 @@ class InternetConnectionHandler {
   /// ```
   static void startListeningToConnectivity() {
     _connectivitySubscription?.cancel();
-    _connectivitySubscription =
-        internetConnectionStatusStream.listen((status) {
+    _connectivitySubscription = internetConnectionStatusStream.listen((status) {
       final connected = status == InternetStatus.connected;
       _isConnected = connected;
       if (!connected) {
@@ -191,9 +190,7 @@ class InternetConnectionHandler {
   /// * `true`  → ping-first with network-adapter fallback
   /// * `false` → adapter-first with ping verification
   static Future<bool> checkInternetConnection(bool isGoogle) {
-    return isGoogle
-        ? isGoogleInternetConnected()
-        : isInternetConnected();
+    return isGoogle ? isGoogleInternetConnected() : isInternetConnected();
   }
 
   /// **Adapter-first** connectivity check.
@@ -220,8 +217,7 @@ class InternetConnectionHandler {
           return false;
         }
 
-        Logger.verbose(
-            'Network adapter active, verifying internet access...');
+        Logger.verbose('Network adapter active, verifying internet access...');
         final hasAccess = await _pingWithTimeout();
         _updateCache(hasAccess);
         return hasAccess;
@@ -291,8 +287,7 @@ class InternetConnectionHandler {
   /// [Future] instead of spawning duplicate pings.
   /// The completer is always reset in the `finally` block to prevent
   /// permanently blocking future checks.
-  static Future<bool> _deduplicatedCheck(
-      Future<bool> Function() check) async {
+  static Future<bool> _deduplicatedCheck(Future<bool> Function() check) async {
     if (_activeCheck != null && !_activeCheck!.isCompleted) {
       return _activeCheck!.future;
     }
