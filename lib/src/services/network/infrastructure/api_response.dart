@@ -286,7 +286,7 @@ class ApiResponse<M> {
   /// ```
   static ApiResponseType _getApiErrorType(DioException dioError) {
     int? statusCode = dioError.response?.statusCode ?? 0;
-    if (statusCode == 401 || statusCode == 403) {
+    if (statusCode == 401) {
       if (UnAuthenticatedConfig.onUnauthenticated != null) {
         UnAuthenticatedConfig.onUnauthenticated!();
       }
